@@ -49,6 +49,38 @@
     <ISO_OutputPath>bin\Debug\</ISO_OutputPath>
     <ISO_EnableGDB>False</ISO_EnableGDB>
     <ISO_StartCosmosGDB>false</ISO_StartCosmosGDB>
+    <IntelEdison_StackCorruptionDetectionEnabled>True</IntelEdison_StackCorruptionDetectionEnabled>
+    <IntelEdison_Name>SharpOSBoot</IntelEdison_Name>
+    <IntelEdison_Description>Connect to Intel Edison device to deploy and debug.</IntelEdison_Description>
+    <IntelEdison_Deployment>BinaryImage</IntelEdison_Deployment>
+    <IntelEdison_Launch>IntelEdison</IntelEdison_Launch>
+    <IntelEdison_DebugEnabled>False</IntelEdison_DebugEnabled>
+    <IntelEdison_DebugMode>Source</IntelEdison_DebugMode>
+    <IntelEdison_VisualStudioDebugPort>Pipe: Cosmos\Serial</IntelEdison_VisualStudioDebugPort>
+    <IntelEdison_VMwareEdition>Player</IntelEdison_VMwareEdition>
+    <IntelEdison_OutputPath>bin\Debug\</IntelEdison_OutputPath>
+    <IntelEdison_EnableGDB>False</IntelEdison_EnableGDB>
+    <IntelEdison_StartCosmosGDB>false</IntelEdison_StartCosmosGDB>
+    <EnableBochsDebug>True</EnableBochsDebug>
+    <StartBochsDebugGui>True</StartBochsDebugGui>
+    <Bochs_StackCorruptionDetectionEnabled>True</Bochs_StackCorruptionDetectionEnabled>
+    <Bochs_Name>SharpOSBoot</Bochs_Name>
+    <Bochs_Description>Use Bochs emulator to deploy and debug.</Bochs_Description>
+    <Bochs_Deployment>ISO</Bochs_Deployment>
+    <Bochs_Launch>Bochs</Bochs_Launch>
+    <Bochs_DebugEnabled>False</Bochs_DebugEnabled>
+    <Bochs_DebugMode>Source</Bochs_DebugMode>
+    <Bochs_VisualStudioDebugPort>Pipe: Cosmos\Serial</Bochs_VisualStudioDebugPort>
+    <Bochs_VMwareEdition>Player</Bochs_VMwareEdition>
+    <Bochs_OutputPath>bin\Debug\</Bochs_OutputPath>
+    <Bochs_EnableGDB>False</Bochs_EnableGDB>
+    <Bochs_StartCosmosGDB>false</Bochs_StartCosmosGDB>
+    <Bochs_EnableBochsDebug>True</Bochs_EnableBochsDebug>
+    <Bochs_StartBochsDebugGui>True</Bochs_StartBochsDebugGui>
+    <TraceAssemblies>Cosmos</TraceAssemblies>
+    <VMware_TraceAssemblies>Cosmos</VMware_TraceAssemblies>
+    <VMware_EnableBochsDebug>True</VMware_EnableBochsDebug>
+    <VMware_StartBochsDebugGui>True</VMware_StartBochsDebugGui>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include=".\SharpOS.csproj">
