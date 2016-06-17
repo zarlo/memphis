@@ -5,6 +5,8 @@ using System.Text;
 using Sys = Cosmos.System;
 
 using SharpOS.SystemRing;
+using System.Drawing;
+using ConsoleDraw.Windows;
 
 namespace SharpOS
 {
@@ -12,14 +14,17 @@ namespace SharpOS
     {
         string env_vars = "TEST:A test value;AUTHOR:Michael VanOverbeek";
 
-        
         string current_directory = "0:\\";
 
         const string kernel_version = "0.0.1";
         const string kernel_flavour = "Earth";
 
+
+
         protected override void BeforeRun()
         {
+            KernelUtils.Init(this);
+            Curse.kern = this;
             env_vars += ";VERSION:" + kernel_version + ";KERNEL:" + kernel_flavour;
             FS = new Sys.FileSystem.CosmosVFS();
             Sys.FileSystem.VFS.VFSManager.RegisterVFS(FS);
@@ -27,14 +32,15 @@ namespace SharpOS
             Console.WriteLine("Scanning filesystems...");
             Console.Clear();
             Console.WriteLine("Welcome to SharpOS.");
-            InterpretCMD("$VERSION");
+            /*InterpretCMD("$VERSION");
             InterpretCMD("$KERNEL");
             InterpretCMD("$AUTHOR");
             Console.Beep(50, 100);
             Console.Beep(100, 100);
             Console.Beep(150, 100);
-
+            */
             Console.WriteLine("System dir separator: " + Sys.FileSystem.VFS.VFSManager.GetDirectorySeparatorChar());
+            
         }
 
         bool running = true;
@@ -51,7 +57,7 @@ namespace SharpOS
                 }
                 catch(Exception e)
                 {
-                    MessageBox(".NET Exception!", e.Message);
+                    Curse.ShowMessagebox(".NET Exception!", e.Message);
                 }
             }
         }
@@ -64,6 +70,37 @@ namespace SharpOS
                 Console.Clear();
                 Console.WriteLine("It is safe to shut down your system.");
                 running = false;
+            }
+            else if(lower.StartsWith("curse_test"))
+            {
+                var w = new ConsoleDraw.Windows.Base.Window(2, 2, Console.WindowWidth - 2, Console.WindowHeight - 2, null);
+                var a = new Alert("Test.", w);
+                a.MainLoop();
+            }
+            else if (lower.StartsWith("sharppad"))
+            {
+                string fname = "";
+                try
+                {
+                    fname = current_directory + input.Remove(0, 9);
+                }
+                catch
+                {
+
+                }
+                StartApplicationLoop(new Apps.SharpPad(), new[] { fname });
+            }
+            else if (lower.StartsWith("fileskimmer"))
+            {
+                StartApplicationLoop(new Apps.FileSkimmer(), new[] { " " });
+            }
+            else if(lower.StartsWith("pkg_install "))
+            {
+                string p = input.Remove(0, 12);
+                if(Directory.Exists(p))
+                {
+                    KernelUtils.HandlePackageInstall(p);
+                }
             }
             else if(lower.StartsWith("write "))
             {
@@ -88,7 +125,12 @@ namespace SharpOS
                 }
                 File.WriteAllText(current_directory + fname, text);
             }
-            else if(lower.StartsWith("help"))
+            else if (lower.StartsWith("help "))
+            {
+                string topic = lower.Remove(0, 5);
+                StartApplicationLoop(new Apps.HelpViewer(), new[] { "0:\\help.db", topic });
+            }
+            else if (lower.StartsWith("help"))
             {
                 StartApplicationLoop(new Apps.HelpViewer(), new[] { "0:\\help.db" });
             }
@@ -132,12 +174,26 @@ namespace SharpOS
                 Console.WriteLine("Type\tName");
                 foreach (var dir in Directory.GetDirectories(current_directory))
                 {
-                    Console.WriteLine("<DIR>\t" + dir);
+                    try
+                    {
+                        Console.WriteLine("<DIR>\t" + dir);
+                    }
+                    catch
+                    {
+
+                    }
                 }
                 foreach (var dir in Directory.GetFiles(current_directory))
                 {
-                    string[] sp = dir.Split(new[] { "." }, StringSplitOptions.RemoveEmptyEntries);
-                    Console.WriteLine(sp[sp.Length - 1] + "\t" + dir);
+                    try
+                    {
+                        string[] sp = dir.Split(new[] { "." }, StringSplitOptions.RemoveEmptyEntries);
+                        Console.WriteLine(sp[sp.Length - 1] + "\t" + dir);
+                    }
+                    catch
+                    {
+
+                    }
                 }
 
             }
@@ -151,7 +207,7 @@ namespace SharpOS
             else if(lower.StartsWith("mkdir "))
             {
                 string dir = input.Remove(0, 6);
-                if(!Directory.Exists(current_directory + dir))
+                if(!dir_exists(current_directory + dir))
                 {
                     Directory.CreateDirectory(current_directory + dir);
                 }
@@ -210,7 +266,7 @@ namespace SharpOS
                 string title = Console.ReadLine();
                 Console.Write("Message Text: ");
                 string text = Console.ReadLine();
-                MessageBox(title, text);
+                Curse.ShowMessagebox(title, text);
             }
             else if(lower.StartsWith("scr "))
             {
@@ -235,10 +291,13 @@ namespace SharpOS
 
         public bool dir_exists(string path)
         {
-            bool val = true;
-            foreach (var dir in Directory.GetDirectories(path))
+            bool val = false;
+            foreach (var dir in Directory.GetDirectories(current_directory))
             {
-                val = (path == dir);
+                if(path == dir)
+                {
+                    val = true;
+                }
             }
             return val;
         }
@@ -248,83 +307,7 @@ namespace SharpOS
             return subject.Split(new[] { split }, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public void MessageBox(string title, string text)
-        {
-            List<string> message_lines = new List<string>();
-            message_lines.Add("+------[ " + title + " ]------+");
-            string t = message_lines[0];
-            int h_space = t.Length - 2;
-            message_lines.Add("|" + Repeat(" ", h_space) + "|");
-            int h_pad = h_space - 2;
-            foreach (string c in SplitChunks(text, h_pad))
-            {
-                message_lines.Add("| " + c + Repeat(" ", c.Length - h_pad) + " |");
-            }
-            message_lines.Add("|" + Repeat(" ", h_space) + "|");
-            string button = "[enter:ok] ";
-            int blength = button.Length;
-            int bpad = (h_space - blength) - 1;
-            message_lines.Add("|" + Repeat(" ", bpad) + button + " |");
-            message_lines.Add("+" + Repeat("-", h_space) + "+");
-            DrawCenter(message_lines.ToArray());
-            var k = Keyboard.ReadKey();
-            if (k.Key == "enter")
-            {
-                Console.CursorLeft = 0;
-                Console.CursorTop = 0;
-                Console.Clear();
-            }
-        }
-
-        public void DrawCenter(string[] contents)
-        {
-            int cornerx = (Console.WindowWidth - contents[0].Length) / 2;
-            int cornery = (Console.WindowHeight - contents.Length) / 2;
-            for (int i = 0; i < contents.Length; i++)
-            {
-                Console.CursorLeft = cornerx;
-                Console.CursorTop = cornery + i;
-                Console.Write(contents[i]);
-            }
-            
-
-        }
-
-        public string Repeat(string text, int length)
-        {
-            string t = text;
-            while (text.Length <= length)
-            {
-                text += t;
-            }
-            return text;
-        }
-
-        public string[] SplitChunks(string orig, int size)
-        {
-            if (string.IsNullOrEmpty(orig))
-            {
-                throw new ArgumentNullException("orig");
-            }
-
-            if (size <= 0)
-            {
-                throw new ArgumentException("Size of chunk must be above 0.");
-            }
-
-            List<string> chunks = new List<string>();
-            while (orig.Length >= size)
-            {
-                chunks.Add(orig.Substring(0, size));
-                orig = orig.Remove(0, size);
-            }
-            if (orig.Length > 0)
-            {
-                chunks.Add(orig);
-            }
-            return chunks.ToArray();
-        }
-
+        
         public void StartApplicationLoop(IApplication app, string[] args)
         {
             app.Start(args);
@@ -333,6 +316,79 @@ namespace SharpOS
                 app.MainLoop(); //while app is running, loop this method.
             }
             app.End(); //stop application, returning control to the kernel.
+        }
+
+        public string get_current_dir()
+        {
+            return current_directory;
+        }
+
+        public void set_current_dir(string d)
+        {
+            current_directory = d;
+        }
+    }
+
+    public class KernelUtils
+    {
+        private static Kernel kern = null;
+
+        public static void Init(Kernel k)
+        {
+            kern = k;
+        }
+
+        public static string GetCurrentDir()
+        {
+            return kern.get_current_dir();
+        }
+
+        public static void SetCurrentDir(string d)
+        {
+            kern.set_current_dir(d);
+        }
+
+        public static void HandlePackageInstall(string path)
+        {
+            if(File.Exists(path + "\\package.apm"))
+            {
+                string[] ln = File.ReadAllLines(path + "\\package.apm");
+                string source = "";
+                string dest = "";
+                foreach (var line in ln)
+                {
+                    if (line.ToLower().StartsWith("Source="))
+                    {
+                        source = line.Remove(0, 7).Replace("%this%", path);
+                    }
+                    else if (line.ToLower().StartsWith("Dest="))
+                    {
+                        source = line.Remove(0, 5).Replace("%main%", "0:\\");
+                    }
+                }
+                CopyRecursive(source, dest);
+            }
+            else
+            {
+                throw new Exception("package.apm file not found! Invalid package.");
+            }
+        }
+
+        public static void CopyRecursive(string s, string d)
+        {
+            foreach (var file in Directory.GetFiles(s))
+            {
+                byte[] fbytes = File.ReadAllBytes(s + "\\" + file);
+                File.WriteAllBytes(d + "\\" + file, fbytes);
+            }
+            foreach(var dir in Directory.GetDirectories(s))
+            {
+                if(!Directory.Exists(d + "\\" + dir))
+                {
+                    Directory.CreateDirectory(d + "\\" + dir);
+                    CopyRecursive(s + "\\" + dir, d + "\\" + dir);
+                }
+            }
         }
     }
 }

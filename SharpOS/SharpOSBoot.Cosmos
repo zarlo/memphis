@@ -81,6 +81,27 @@
     <VMware_TraceAssemblies>Cosmos</VMware_TraceAssemblies>
     <VMware_EnableBochsDebug>True</VMware_EnableBochsDebug>
     <VMware_StartBochsDebugGui>True</VMware_StartBochsDebugGui>
+    <ISO_TraceAssemblies>Cosmos</ISO_TraceAssemblies>
+    <ISO_EnableBochsDebug>True</ISO_EnableBochsDebug>
+    <ISO_StartBochsDebugGui>True</ISO_StartBochsDebugGui>
+    <IntelEdison_TraceAssemblies>Cosmos</IntelEdison_TraceAssemblies>
+    <IntelEdison_EnableBochsDebug>True</IntelEdison_EnableBochsDebug>
+    <IntelEdison_StartBochsDebugGui>True</IntelEdison_StartBochsDebugGui>
+    <PXE_StackCorruptionDetectionEnabled>True</PXE_StackCorruptionDetectionEnabled>
+    <PXE_Name>SharpOSBoot</PXE_Name>
+    <PXE_Description>Creates a PXE setup and hosts a DCHP and TFTP server to deploy directly to physical hardware. Allows debugging with a serial cable.</PXE_Description>
+    <PXE_Deployment>PXE</PXE_Deployment>
+    <PXE_Launch>None</PXE_Launch>
+    <PXE_DebugEnabled>False</PXE_DebugEnabled>
+    <PXE_DebugMode>Source</PXE_DebugMode>
+    <PXE_VisualStudioDebugPort>Pipe: Cosmos\Serial</PXE_VisualStudioDebugPort>
+    <PXE_VMwareEdition>Player</PXE_VMwareEdition>
+    <PXE_OutputPath>bin\Debug\</PXE_OutputPath>
+    <PXE_TraceAssemblies>Cosmos</PXE_TraceAssemblies>
+    <PXE_EnableGDB>False</PXE_EnableGDB>
+    <PXE_StartCosmosGDB>false</PXE_StartCosmosGDB>
+    <PXE_EnableBochsDebug>True</PXE_EnableBochsDebug>
+    <PXE_StartBochsDebugGui>True</PXE_StartBochsDebugGui>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include=".\SharpOS.csproj">

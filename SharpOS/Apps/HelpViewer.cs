@@ -31,6 +31,22 @@ namespace SharpOS.Apps
             help_string = File.ReadAllText(args[0]); //get help string.
 
             ParseHelp();
+
+            if(args[1] != null)
+            {
+                bool show_error = true;
+                for(int i = 0; i < help_keys.Count; i++)
+                {
+                    if(help_keys[i].ToLower() == args[1].ToLower())
+                    {
+                        viewing = true;
+                        show_error = false;
+                        help_doc = i;
+                    }
+                }
+                if (show_error)
+                    Curse.ShowMessagebox("Help Viewer - Topic not found.", "Help Viewer could not find the topic specified in the command argument.");
+            }
         }
 
         public void ParseHelp()
