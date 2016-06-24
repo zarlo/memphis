@@ -1,11 +1,11 @@
-﻿using SharpOS.SystemRing;
+﻿using Memphis.SystemRing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpOS
+namespace Memphis
 {
     class Curse
     {
@@ -131,31 +131,70 @@ namespace SharpOS
 
         public static void ShowMessagebox(string title, string text)
         {
-            List<string> message_lines = new List<string>();
-            message_lines.Add("+------[ " + title + " ]------+");
-            string t = message_lines[0];
-            int h_space = t.Length - 3;
-            message_lines.Add("|" + Repeat(" ", h_space) + "|");
-            int h_pad = h_space - 2;
-            foreach (string c in SplitChunks(text, h_pad))
+            int splitWidth = 25;
+            if(text.Length < splitWidth)
             {
-                message_lines.Add("| " + c + Repeat(" ", h_pad - c.Length) + " |");
+                splitWidth = text.Length;
             }
-            message_lines.Add("|" + Repeat(" ", h_space) + "|");
-            string button = "[enter:ok] ";
-            int blength = button.Length;
-            int bpad = (h_space - blength) - 1;
-            message_lines.Add("|" + Repeat(" ", bpad) + button + " |");
-            message_lines.Add("+" + Repeat("-", h_space) + "+");
-            DrawCenter(message_lines.ToArray());
-            var k = Console.ReadKey();
-            if (k.Key == ConsoleKey.Enter)
+            if(title.Length > splitWidth)
             {
-                Console.CursorLeft = 0;
-                Console.CursorTop = 0;
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.Clear();
+                splitWidth = title.Length;
+            }
+            var lines = new List<string>();
+            if(splitWidth > text.Length)
+            {
+                lines.Add(text);
+            }
+            else
+            {
+                lines = TUI.Utils.split_string(splitWidth, text);
+            }
+            foreach(var line in lines)
+            {
+                if(text.Contains(line))
+                {
+                    text = text.Replace(line, "");
+                }
+            }
+            if(text.Length > 0)
+            {
+                lines.Add(text);
+            }
+            int h = lines.Count + 4;
+            int w = 0;
+            foreach(var line in lines)
+            {
+                if(line.Length + 4 > w)
+                {
+                    w = line.Length + 4;
+                }
+            }
+            int x = (Console.WindowWidth - w) / 2;
+            int y = (Console.WindowHeight - h) / 2;
+            TUI.Utils.ClearArea(x + 1, y + 1, w, h, ConsoleColor.Black);
+            TUI.Utils.ClearArea(x, y, w, h, ConsoleColor.Green);
+            TUI.Utils.ClearArea(x, y, w, 1, ConsoleColor.White);
+            TUI.Utils.Write(x + 1, y, title, ConsoleColor.White, ConsoleColor.Black);
+            for(int i = 0; i < lines.Count - 1; i++)
+            {
+                TUI.Utils.Write(x + 2, (y + 2) + i, lines[i], ConsoleColor.Green, ConsoleColor.White);
+            }
+            int xw = x + w;
+            int yh = y + h;
+            TUI.Utils.Write(xw - 6, yh - 2, "<OK>", TUI.Utils.COL_BUTTON_SELECTED, TUI.Utils.COL_BUTTON_TEXT);
+            bool stuck = true;
+            while (stuck)
+            {
+                var kinf = Console.ReadKey();
+                if (kinf.Key == ConsoleKey.Enter)
+                {
+                    stuck = false;
+                    Console.Clear();
+                }
+                else
+                {
+
+                }
             }
         }
 

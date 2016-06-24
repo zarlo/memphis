@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpOS.Apps
+namespace Memphis.Apps
 {
-    //TODO: Make appscape compatible with sharpos.
+    //TODO: Make appscape compatible with Memphis.
     class Appscape_Mini : IApplication
     {
         public override void Start(string[] args)

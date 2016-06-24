@@ -19,7 +19,7 @@
     <StartCosmosGDB>false</StartCosmosGDB>
     <VMWareEdition>Player</VMWareEdition>
     <OutputPath>bin\Debug\</OutputPath>
-    <Name>SharpOSBoot</Name>
+    <Name>MemphisBoot</Name>
     <Description>Use VMware Player or Workstation to deploy and debug.</Description>
     <Deployment>ISO</Deployment>
     <Launch>VMware</Launch>
@@ -104,15 +104,16 @@
     <PXE_StartBochsDebugGui>True</PXE_StartBochsDebugGui>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include=".\SharpOS.csproj">
-      <Name>SharpOS</Name>
-      <Project>{e500abe8-e86a-4517-b69a-f0d049705df8}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="Cosmos.Core.Plugs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5ae71220097cb983" />
     <Reference Include="Cosmos.System.Plugs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5ae71220097cb983" />
     <Reference Include="Cosmos.Debug.Kernel.Plugs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5ae71220097cb983" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharpOS\Memphis.csproj">
+      <Name>Memphis</Name>
+      <Project>{e500abe8-e86a-4517-b69a-f0d049705df8}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!--<ItemGroup>
     <Content Include="Cosmos.bxrc">

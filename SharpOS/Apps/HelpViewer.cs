@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SharpOS;
+using Memphis;
 using System.IO;
 
-namespace SharpOS.Apps
+namespace Memphis.Apps
 {
     class HelpViewer : IApplication
     {
@@ -86,7 +86,7 @@ namespace SharpOS.Apps
             Console.CursorTop = 1;
             if (viewing == false)
             {
-                Console.Write(@"SharpOS Help Viewer
+                Console.Write(@"Memphis Help Viewer
 ==========================
 
 Topics:
@@ -147,7 +147,7 @@ Topics:
             }
             else
             {
-                Console.Write(@"SharpOS Help Viewer
+                Console.Write(@"Memphis Help Viewer
 ==========================
 
 " + help_keys[help_doc] + @":

@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpOS", "SharpOS\SharpOS.csproj", "{E500ABE8-E86A-4517-B69A-F0D049705DF8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memphis", "SharpOS\Memphis.csproj", "{E500ABE8-E86A-4517-B69A-F0D049705DF8}"
 EndProject
-Project("{471EC4BB-E47E-4229-A789-D1F5F83B52D4}") = "SharpOSBoot", "SharpOS\SharpOSBoot.Cosmos", "{C79A25B7-D659-473E-80CF-CB6787F8EBC7}"
+Project("{471EC4BB-E47E-4229-A789-D1F5F83B52D4}") = "MemphisBoot", "SharpOS\MemphisBoot.Cosmos", "{C79A25B7-D659-473E-80CF-CB6787F8EBC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpOS_SystemRing", "SharpOS_SystemRing\SharpOS_SystemRing.csproj", "{F8F9ADA6-0B9C-4AD9-8F4C-D1DD77166A4E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memphis_SystemRing", "SharpOS_SystemRing\Memphis_SystemRing.csproj", "{F8F9ADA6-0B9C-4AD9-8F4C-D1DD77166A4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpOS_HardwareRing", "SharpOS_HardwareRing\SharpOS_HardwareRing.csproj", "{8672216B-A532-4FE4-92BD-38AC06271898}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleDraw", "..\ConsoleDraw\Source\ConsoleDraw\ConsoleDraw.csproj", "{5978DE85-3FB9-4BAB-965F-95E4398309A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memphis_HardwareRing", "SharpOS_HardwareRing\Memphis_HardwareRing.csproj", "{8672216B-A532-4FE4-92BD-38AC06271898}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,14 +44,6 @@ Global
 		{8672216B-A532-4FE4-92BD-38AC06271898}.Release|Any CPU.ActiveCfg = Release|x86
 		{8672216B-A532-4FE4-92BD-38AC06271898}.Release|x86.ActiveCfg = Release|x86
 		{8672216B-A532-4FE4-92BD-38AC06271898}.Release|x86.Build.0 = Release|x86
-		{5978DE85-3FB9-4BAB-965F-95E4398309A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5978DE85-3FB9-4BAB-965F-95E4398309A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5978DE85-3FB9-4BAB-965F-95E4398309A2}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5978DE85-3FB9-4BAB-965F-95E4398309A2}.Debug|x86.Build.0 = Debug|Any CPU
-		{5978DE85-3FB9-4BAB-965F-95E4398309A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5978DE85-3FB9-4BAB-965F-95E4398309A2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5978DE85-3FB9-4BAB-965F-95E4398309A2}.Release|x86.ActiveCfg = Release|Any CPU
-		{5978DE85-3FB9-4BAB-965F-95E4398309A2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

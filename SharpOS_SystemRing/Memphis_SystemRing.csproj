@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8672216B-A532-4FE4-92BD-38AC06271898}</ProjectGuid>
+    <ProjectGuid>{F8F9ADA6-0B9C-4AD9-8F4C-D1DD77166A4E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SharpOS_HardwareRing</RootNamespace>
-    <AssemblyName>SharpOS_HardwareRing</AssemblyName>
+    <RootNamespace>Memphis_SystemRing</RootNamespace>
+    <AssemblyName>Memphis_SystemRing</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
@@ -41,12 +41,24 @@
     <Reference Include="Cosmos.System.Plugs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5ae71220097cb983, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Cosmos.System, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5ae71220097cb983, processorArchitecture=MSIL" />
     <Reference Include="Cosmos.Debug.Kernel, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5ae71220097cb983, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Plugs\EventImpl.cs" />
+    <Compile Include="VBEGraphics.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharpOS_HardwareRing\Memphis_HardwareRing.csproj">
+      <Project>{8672216b-a532-4fe4-92bd-38ac06271898}</Project>
+      <Name>Memphis_HardwareRing</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="il2cpu\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

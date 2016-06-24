@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpOS.SystemRing
+namespace Memphis.SystemRing
 {
     public class VBE
     {
