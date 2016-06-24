@@ -4,11 +4,10 @@ using System.IO;
 using System.Text;
 using Sys = Cosmos.System;
 
-using SharpOS.SystemRing;
+using Memphis.SystemRing;
 using System.Drawing;
-using ConsoleDraw.Windows;
 
-namespace SharpOS
+namespace Memphis
 {
     public class Kernel : Sys.Kernel
     {
@@ -18,8 +17,6 @@ namespace SharpOS
 
         const string kernel_version = "0.0.1";
         const string kernel_flavour = "Earth";
-
-
 
         protected override void BeforeRun()
         {
@@ -31,7 +28,7 @@ namespace SharpOS
             FS.Initialize();
             Console.WriteLine("Scanning filesystems...");
             Console.Clear();
-            Console.WriteLine("Welcome to SharpOS.");
+            Console.WriteLine("Welcome to Memphis.");
             /*InterpretCMD("$VERSION");
             InterpretCMD("$KERNEL");
             InterpretCMD("$AUTHOR");
@@ -49,15 +46,39 @@ namespace SharpOS
         {
             while (running)
             {
-                try
+                if (TUI.Utils.Windows.Count > 0)
                 {
-                    Console.Write(current_directory + "> ");
-                    string input = Console.ReadLine();
-                    InterpretCMD(input);
+                    var kinf = Console.ReadKey(true);
+                    if(kinf.Key == ConsoleKey.Tab)
+                    {
+                        TUI.Utils.Windows[TUI.Utils.SelectedWindow].UnSelect();
+                        if (TUI.Utils.SelectedWindow < TUI.Utils.Windows.Count - 1)
+                        {
+                            TUI.Utils.SelectedWindow += 1;
+                        }
+                        else
+                        {
+                            TUI.Utils.SelectedWindow = 0;
+                        }
+                        TUI.Utils.Windows[TUI.Utils.SelectedWindow].Select();
+                    }
+                    else
+                    {
+                        TUI.Utils.Windows[TUI.Utils.SelectedWindow].KeyDown(kinf);
+                    }
                 }
-                catch(Exception e)
+                else
                 {
-                    Curse.ShowMessagebox(".NET Exception!", e.Message);
+                    try
+                    {
+                        Console.Write(current_directory + "> ");
+                        string input = Console.ReadLine();
+                        InterpretCMD(input);
+                    }
+                    catch (Exception e)
+                    {
+                        Curse.ShowMessagebox(".NET Exception!", e.Message);
+                    }
                 }
             }
         }
@@ -71,11 +92,39 @@ namespace SharpOS
                 Console.WriteLine("It is safe to shut down your system.");
                 running = false;
             }
-            else if(lower.StartsWith("curse_test"))
+            else if(lower.StartsWith("conf-gen"))
             {
-                var w = new ConsoleDraw.Windows.Base.Window(2, 2, Console.WindowWidth - 2, Console.WindowHeight - 2, null);
-                var a = new Alert("Test.", w);
-                a.MainLoop();
+                StartApplicationLoop(new Apps.ConfigurationGenerator(), new[] { "" });
+            }
+            else if(lower.StartsWith("rm "))
+            {
+                string path = current_directory + input.Remove(0, 3);
+                if (Directory.Exists(path))
+                {
+                    Console.WriteLine("rm: You can't delete a directory. Not yet implemented.");
+                }
+                else
+                {
+                    if(File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                    else
+                    {
+                        Console.WriteLine("rm: File doesn't exist.");
+                    }
+                }
+            }
+            else if(lower.StartsWith("win_test"))
+            {
+                var w = new TUI.BlankWindow("Jonathan Ladouceur", 22, 10, 2, 2);
+                Console.CursorLeft = 0;
+                Console.CursorTop = 0;
+                Console.BackgroundColor = ConsoleColor.Black;
+                var b1 = new TUI.Button("He's awesome.", 2, 2, 10, 1, w);
+                var b2 = new TUI.Button("NEIN", 2, 4, 10, 1, w);
+                var w2 = new TUI.BlankWindow("Another Window", 32, 20, w.X + w.Width + 3, w.Y);
+
             }
             else if (lower.StartsWith("sharppad"))
             {

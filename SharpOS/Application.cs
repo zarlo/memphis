@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpOS
+namespace Memphis
 {
     public abstract class IApplication
     {
