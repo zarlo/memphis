@@ -11,7 +11,7 @@ namespace Memphis.Apps
     {
         public override void Start(string[] args)
         {
-            throw new NotImplementedException();
+            Curse.ShowMessagebox("Appscape", "Appscape is not currently available in this version of Memphis.");
         }
 
         public override bool Running

@@ -23,96 +23,250 @@ namespace Memphis.Apps
         public bool in_menu = false;
         public int selected_item = 0;
 
+
         public override void Start(string[] args)
         {
-            Console.BackgroundColor = ConsoleColor.Blue;
+            in_menu = true;
+            Running = true;
+            //clear console
             Console.Clear();
-            Curse.ShowMessagebox("SharpPad - Broken.", "SharpPad is being rewritten and is broken.");
+            if (!string.IsNullOrEmpty(args[0]))
+            {
+                if (File.Exists(args[0]))
+                {
+                    file_path = args[0];
+                    LoadFromFile();
+                }
+            }
+            Curse.ShowMessagebox("SharpPad", "Welcome to SharpPad! SharpPad is a text editor that allows you to edit text of any text file. In this current version, there are some bugs, so beware!");
         }
 
         public void LoadFromFile()
         {
-            string file = File.ReadAllText(file_path);
-            LoadedContents = file;
+            string[] file = File.ReadAllLines(file_path);
+            lines = new List<string>();
+            foreach (string ln in file)
+            {
+                lines.Add(ln);
+            }
             RedrawEntireScreen = true;
             in_menu = false;
         }
-
-        public string LoadedContents = "";
 
         public override bool Running { get; set; }
 
         public override void MainLoop()
         {
-            try
+            if (RedrawEntireScreen)
             {
-                if(RedrawEntireScreen)
+                Console.Clear();
+            }
+            Console.CursorLeft = 0;
+            Console.CursorTop = 0;
+            if (file_path != null)
+            {
+                Console.Write("SharpPad - " + file_path);
+            }
+            else
+            {
+                Console.Write("SharpPad - Untitled");
+            }
+            Console.CursorLeft = 0;
+            Console.CursorTop = Console.WindowHeight - 1;
+            Console.Write("esc=menu");
+
+            //INSIDE MENU
+            if (in_menu)
+            {
+                for (int i = 0; i < menu_items.Length; i++)
                 {
-                    if(in_menu)
+                    Console.CursorLeft = 2;
+                    Console.CursorTop = 2 + i;
+                    if (i == selected_item)
                     {
-                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.Write("> " + menu_items[i]);
                     }
                     else
                     {
-                        Console.BackgroundColor = ConsoleColor.Blue;
+                        Console.Write("  " + menu_items[i]);
                     }
-                    Console.Clear();
-                    TUI.Utils.ClearArea(0, 0, Console.WindowWidth, 1, ConsoleColor.Gray);
-                    TUI.Utils.Write(1, 0, "SharpPad", ConsoleColor.Gray, ConsoleColor.White);
-                }
-                if (in_menu)
-                {
-                    for (int i = 0; i < menu_items.Length; i++)
-                    {
-                        Console.CursorLeft = 2;
-                        Console.CursorTop = 2 + i;
-                        if (i == selected_item)
-                        {
-                            Console.BackgroundColor = ConsoleColor.Gray;
-                            Console.Write("> " + menu_items[i]);
-                        }
-                        else
-                        {
-                            Console.BackgroundColor = ConsoleColor.Black;
-                            Console.Write("  " + menu_items[i]);
-                        }
 
-                    }
-                    var inf = Console.ReadKey();
-                    switch (inf.Key)
+                }
+                var inf = Console.ReadKey();
+                switch (inf.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        if (selected_item > 0)
+                        {
+                            selected_item -= 1;
+                        }
+                        break;
+                    case ConsoleKey.DownArrow:
+                        if (selected_item < menu_items.Length)
+                        {
+                            selected_item += 1;
+                        }
+                        break;
+                    case ConsoleKey.Enter:
+                        PerformMenuAction();
+                        break;
+                    case ConsoleKey.Escape:
+                        if (lines != null)
+                        {
+                            in_menu = false;
+                            RedrawEntireScreen = true;
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                //IN FILE
+                if (RedrawEntireScreen)
+                {
+                    //Draw the entire text file to screen.
+
+                    //Since the line count can be less than the screen height, we'll have to compensate.
+                    if (lines.Count < Console.WindowHeight - 2)
                     {
-                        case ConsoleKey.UpArrow:
-                            if (selected_item > 0)
-                            {
-                                selected_item -= 1;
-                            }
-                            break;
-                        case ConsoleKey.DownArrow:
-                            if (selected_item < menu_items.Length - 1)
-                            {
-                                selected_item += 1;
-                            }
-                            break;
-                        case ConsoleKey.Enter:
-                            PerformMenuAction();
-                            break;
-                        case ConsoleKey.Escape:
-                            if (lines != null)
-                            {
-                                in_menu = false;
-                                RedrawEntireScreen = true;
-                            }
-                            break;
+                        DrawText(lines);
                     }
+                    else
+                    {
+                        DrawText(get_range(0 + scroll, Console.WindowHeight - 2));
+                    }
+                    RedrawEntireScreen = false;
                 }
                 else
                 {
 
-                }
-            }
-            catch
-            {
+                    Console.CursorLeft = 0;
+                    Console.CursorTop = 1 + yCoord;
+                    for (int i = 0; i < Console.WindowWidth; i++)
+                    {
+                        Console.Write(" ");
+                    }
+                    Console.CursorLeft = 0;
+                    Console.CursorTop = 1 + yCoord;
 
+                    string str = lines[yCoord + scroll];
+                    char[] chars = get_char_array(str);
+                    if (chars.Length > Console.WindowWidth)
+                    {
+                        for (int i = char_offset; i < Console.WindowWidth; i++)
+                        {
+                            Console.Write(chars[i]);
+                        }
+                    }
+                    else
+                    {
+                        Console.Write(str);
+                    }
+                }
+                Console.CursorLeft = xCoord;
+                Console.CursorTop = 1 + yCoord;
+                var inf = Console.ReadKey();
+                try
+                {
+                    switch (inf.Key)
+                    {
+                        case ConsoleKey.UpArrow:
+                            MoveUp();
+                            break;
+                        case ConsoleKey.DownArrow:
+                            MoveDown();
+                            break;
+                        case ConsoleKey.LeftArrow:
+                            MoveLeft();
+                            break;
+                        case ConsoleKey.RightArrow:
+                            MoveRight();
+                            break;
+                        case ConsoleKey.Enter:
+                            int hindex = xCoord + char_offset;
+                            int vindex = yCoord + scroll;
+                            string str = lines[vindex];
+                            if (xCoord >= str.Length - 1)
+                            {
+                                lines.Insert(vindex + 1, " ");
+                            }
+                            else
+                            {
+                                string substr = str.Substring(hindex, str.Length - hindex);
+                                if (substr == " ")
+                                {
+                                    lines.Insert(vindex + 1, " ");
+                                }
+                                else
+                                {
+                                    lines[vindex] = str.Replace(substr, "");
+                                    lines.Insert(vindex + 1, substr);
+                                }
+                            }
+                            xCoord = 0;
+                            MoveDown();
+                            RedrawEntireScreen = true;
+                            break;
+                        case ConsoleKey.Backspace:
+                            bool scrollup = false;
+                            string strtomodify = lines[yCoord + scroll];
+                            int inde = xCoord + char_offset;
+                            if (inde == 0)
+                            {
+                                if ((yCoord + scroll) > 0)
+                                {
+                                    if (strtomodify.Length == 0)
+                                    {
+                                        lines.RemoveAt(yCoord + scroll);
+                                        scrollup = true;
+                                    }
+                                    else
+                                    {
+
+                                        lines[(yCoord + scroll) - 1] += strtomodify;
+                                        lines.RemoveAt(yCoord + scroll);
+                                        scrollup = true;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                lines[yCoord + scroll] = strtomodify.Remove(inde - 1, 1);
+                                MoveLeft();
+                            }
+                            if (scrollup == true)
+                            {
+                                MoveUp();
+                                MoveToEnd();
+                            }
+                            break;
+                        case ConsoleKey.Escape:
+                            in_menu = true;
+                            RedrawEntireScreen = true;
+                            selected_item = 0;
+                            break;
+                        case ConsoleKey.Tab:
+                            //TODO: tab
+                            break;
+                        case ConsoleKey.Spacebar:
+                            string stri = lines[yCoord + scroll];
+                            int ind = xCoord + char_offset;
+                            lines[yCoord + scroll] = stri.Insert(ind, " ");
+                            MoveRight();
+                            break;
+                        default:
+                            throw new Exception();
+                    }
+                }
+                catch
+                {
+                    string st = lines[yCoord + scroll];
+                    int index = xCoord + char_offset;
+                    lines[yCoord + scroll] = st.Insert(index, inf.KeyChar.ToString());
+                    MoveRight();
+
+
+                }
             }
         }
 
@@ -182,20 +336,20 @@ namespace Memphis.Apps
         public void MoveToEnd()
         {
             string str = lines[yCoord + scroll];
-            if(str.Length > Console.WindowWidth)
+            if (str.Length > Console.WindowWidth)
             {
-                while(xCoord < Console.WindowWidth)
+                while (xCoord < Console.WindowWidth)
                 {
                     xCoord += 1;
                 }
-                while(char_offset < str.Length - Console.WindowWidth)
+                while (char_offset < str.Length - Console.WindowWidth)
                 {
                     char_offset += 1;
                 }
             }
             else
             {
-                while(xCoord < str.Length)
+                while (xCoord < str.Length)
                 {
                     xCoord += 1;
                 }
@@ -272,7 +426,7 @@ namespace Memphis.Apps
         public char[] get_char_array(string str)
         {
             List<char> chars = new List<char>();
-            foreach(char c in str)
+            foreach (char c in str)
             {
                 chars.Add(c);
             }
@@ -281,10 +435,10 @@ namespace Memphis.Apps
 
         public void PerformMenuAction()
         {
-            switch(menu_items[selected_item])
+            switch (menu_items[selected_item])
             {
                 case "New":
-                    if(file_path == null)
+                    if (file_path == null)
                     {
                         lines = new List<string>();
                         lines.Add(" ");
@@ -358,7 +512,7 @@ namespace Memphis.Apps
 
         public override void End()
         {
-           
+
         }
 
         public void SaveFile()

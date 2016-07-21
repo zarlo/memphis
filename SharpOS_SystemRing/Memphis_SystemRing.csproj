@@ -48,7 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Mouse.cs" />
     <Compile Include="Plugs\EventImpl.cs" />
+    <Compile Include="SystemInfo.cs" />
     <Compile Include="VBEGraphics.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,18 +6,184 @@ using Sys = Cosmos.System;
 
 using Memphis.SystemRing;
 using System.Drawing;
+using Memphis_SystemRing;
+using static Memphis_SystemRing.SystemHelpers;
 
 namespace Memphis
 {
+    public class User
+    {
+        public string Name { get; set; }
+        public int PermissionLevel { get; set; }
+        public string UserDirectory { get; set; }
+    }
+
+    public class UserManager
+    {
+        private static readonly User livesession_user = new User { Name = "memphis_live", PermissionLevel = 3, UserDirectory = "0:\\" }; //Live session user, has admin privileges.
+        private static readonly User system_user = new User { Name = "memphis", PermissionLevel = 4, UserDirectory = "0:\\" }; //This user will act as a fully-privileged user to manage the system.
+        private static User current_user = null;
+
+        public static User CurrentUser
+        {
+            get
+            {
+                if (is_livesession)
+                    return livesession_user;
+                return current_user;
+            }
+        }
+
+        private const bool is_livesession = true;
+
+        /// <summary>
+        /// Determines if the specified password is correct
+        /// for the specified user.
+        /// </summary>
+        /// <param name="user">The user info to check.</param>
+        /// <param name="pass">The password.</param>
+        /// <returns>True if the password is correct, false if it wasn't or the password database wasn't found.</returns>
+        public static bool Authenticate(User user, string pass)
+        {
+            if(File.Exists(@"0:\System\passwd"))
+            {
+                string[] passwd = File.ReadAllLines(@"0:\System\passwd");
+                foreach(string line in passwd)
+                {
+                    string[] data = line.Split('\t');
+                    if (data[0] == user.Name && data[1] == pass)
+                        return true; 
+                }
+            }
+            return false;
+        }
+
+        public static void LoginScreen()
+        {
+            Console.BackgroundColor = ConsoleColor.Blue;
+            Console.Clear();
+            Console.WriteLine(Kernel.memphis_logo);
+            if (is_livesession)
+            {
+                int seconds_start = SystemInfo.Time.Second;
+                int seconds_passed = 0;
+                while (seconds_passed < 10)
+                {
+                    Console.CursorTop = 13;
+                    Console.CursorLeft = (Console.WindowWidth - "Live session.".Length) / 2;
+                    Console.WriteLine("Live session.");
+                    Console.CursorTop = 15;
+                    Console.CursorLeft = 0;
+                    Console.WriteLine($"Initiating live session in {10 - seconds_passed} seconds...");
+                    while(SystemInfo.Time.Second == seconds_start)
+                    {
+                    }
+                    seconds_passed += 1;
+                    seconds_start = SystemInfo.Time.Second;
+                }
+                Console.BackgroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.CursorTop = 13;
+                Kernel.CenterWrite("Log In");
+                Console.CursorTop = 15;
+                Console.WriteLine("Username:");
+                var usr = GetUser(Console.ReadLine());
+                if (usr == null)
+                {
+                    Curse.ShowMessagebox("User not found.", "The username you entered was not found in the database.");
+                    LoginScreen();
+                    return;
+                }
+                Console.WriteLine("Password:");
+                if (Authenticate(usr, Console.ReadLine()) == false)
+                {
+                    Curse.ShowMessagebox("Invalid password.", "The password you entered was invalid.");
+                    LoginScreen();
+                    return;
+                }
+                current_user = usr;
+
+            }
+        }
+
+        public static User GetUser(string name)
+        {
+            if (is_livesession)
+                return livesession_user;
+
+            foreach(var user in read_userlist())
+            {
+                if (user.Name == name)
+                    return user;
+            }
+
+            return null;
+        }
+
+        private static User[] read_userlist()
+        {
+            List<User> users = new List<User>();
+            users.Add(system_user);
+            if (File.Exists(@"0:\System\user.db"))
+            {
+                string[] users_unserialized = File.ReadAllLines(@"0:\System\user.db");
+                foreach(string userdata in users_unserialized)
+                {
+                    string[] data = userdata.Split('\t');
+                    User usr = new User();
+                    usr.Name = data[0];
+                    switch(data[1])
+                    {
+                        case "USER":
+                            usr.PermissionLevel = 2;
+                            break;
+                        case "ADMIN":
+                            usr.PermissionLevel = 3;
+                            break;
+                        default:
+                            usr.PermissionLevel = 1;
+                            break;
+                    }
+                    usr.UserDirectory = data[2];
+                    users.Add(usr);
+                }
+            }
+            User[] user_list = new User[users.Count];
+            for(int i = 0; i < user_list.Length; i++)
+            {
+                user_list[i] = users[i];
+            }
+            return user_list;
+        }
+    }
+
     public class Kernel : Sys.Kernel
     {
-        string env_vars = "TEST:A test value;AUTHOR:Michael VanOverbeek";
+        string env_vars = "AUTHOR:Michael VanOverbeek";
 
         string current_directory = "0:\\";
 
-        const string kernel_version = "0.0.1";
-        const string kernel_flavour = "Earth";
+        public static void CenterWrite(string text)
+        {
+            Console.CursorLeft = (Console.WindowWidth - text.Length) / 2;
+            Console.WriteLine(text);
+        }
 
+        const string kernel_version = "0.0.2";
+        const string kernel_flavour = "Ladouceur";
+        public const string memphis_logo = @"
+  _     _                                   _         _
+ |  \  / |   ___                           | |       |_|   ____
+ |   \/  |  /    \   _________    _____    | |____    _   /  __|
+ | |\_/| | | ( )  | |  _   _  |  |  _  \   |  __  |  | |  | |__
+ | |   | | | ____/  | | | | | |  | |_|  |  | |  | |  | |  _\___ \
+ |_|   |_|  \____/  |_| |_| |_|  |  ___/   |_|  |_|  |_| |_____/
+                                 | |
+ Powered by the C# Open Source   |_| Managed Operating System.
+____________________________________________________________________
+";
         protected override void BeforeRun()
         {
             KernelUtils.Init(this);
@@ -27,17 +193,37 @@ namespace Memphis
             Sys.FileSystem.VFS.VFSManager.RegisterVFS(FS);
             FS.Initialize();
             Console.WriteLine("Scanning filesystems...");
+            if(!Directory.Exists(@"0:\"))
+            {
+                Curse.ShowMessagebox("FAT Driver", "Cosmos could not find a valid FAT filesystem on 0:\\. Some Memphis applications may not function.");
+            }
+            UserManager.LoginScreen();
             Console.Clear();
+            Console.WriteLine(memphis_logo);
             Console.WriteLine("Welcome to Memphis.");
-            /*InterpretCMD("$VERSION");
-            InterpretCMD("$KERNEL");
-            InterpretCMD("$AUTHOR");
-            Console.Beep(50, 100);
-            Console.Beep(100, 100);
-            Console.Beep(150, 100);
-            */
-            Console.WriteLine("System dir separator: " + Sys.FileSystem.VFS.VFSManager.GetDirectorySeparatorChar());
+            Console.WriteLine($"Version: {GetVar("VERSION")}\t\tKernel flavour: {GetVar("KERNEL")}");
+            Console.WriteLine($@"System information:
+ - FAT partition count: {Sys.FileSystem.VFS.VFSManager.GetVolumes().Count}
+ - Current user: {UserManager.CurrentUser.Name}
+ - Permission level: {UserManager.CurrentUser.PermissionLevel}
+ - User Directory: {UserManager.CurrentUser.UserDirectory}
+ - Current date and time is: {SystemInfo.Time.ToString()}");
             
+
+        }
+
+        public string GetVar(string input)
+        {
+            string[] evars = split_str(env_vars, ";");
+            foreach (string kv in evars)
+            {
+                string[] var = split_str(kv, ":");
+                if (var[0] == input)
+                {
+                    return var[1];
+                }
+            }
+            return "";
         }
 
         bool running = true;
@@ -46,41 +232,85 @@ namespace Memphis
         {
             while (running)
             {
-                if (TUI.Utils.Windows.Count > 0)
+                try
                 {
-                    var kinf = Console.ReadKey(true);
-                    if(kinf.Key == ConsoleKey.Tab)
+                    if (TUI.Utils.Windows.Count > 0)
                     {
-                        TUI.Utils.Windows[TUI.Utils.SelectedWindow].UnSelect();
-                        if (TUI.Utils.SelectedWindow < TUI.Utils.Windows.Count - 1)
+                        var kinf = Console.ReadKey(true);
+                        if (kinf.Key == ConsoleKey.Tab)
                         {
-                            TUI.Utils.SelectedWindow += 1;
+                            TUI.Utils.Windows[TUI.Utils.SelectedWindow].UnSelect();
+                            if (TUI.Utils.SelectedWindow < TUI.Utils.Windows.Count - 1)
+                            {
+                                TUI.Utils.SelectedWindow += 1;
+                            }
+                            else
+                            {
+                                TUI.Utils.SelectedWindow = 0;
+                            }
+                            TUI.Utils.Windows[TUI.Utils.SelectedWindow].Select();
                         }
                         else
                         {
-                            TUI.Utils.SelectedWindow = 0;
+                            TUI.Utils.Windows[TUI.Utils.SelectedWindow].KeyDown(kinf);
                         }
-                        TUI.Utils.Windows[TUI.Utils.SelectedWindow].Select();
                     }
                     else
                     {
-                        TUI.Utils.Windows[TUI.Utils.SelectedWindow].KeyDown(kinf);
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        Console.Write(current_directory + "> ");
+                        Console.Write(current_directory + $" [{UserManager.CurrentUser.Name}]> ");
                         string input = Console.ReadLine();
                         InterpretCMD(input);
                     }
-                    catch (Exception e)
-                    {
-                        Curse.ShowMessagebox(".NET Exception!", e.Message);
-                    }
+                }
+                catch(Exception ex)
+                {
+                    StopKernel(ex);
                 }
             }
+        }
+
+
+        public const string sad_monitor = @"
+ ____________
+|            |      ______________________________________________
+|  ()    ()  |     /                                              \
+|   ______   | ---|  Looks like an error occurred... Now I'm sad.  |
+| /        \ |     \______________________________________________/
+|____________|"; //Memphis is sad because it encountered an error. It's gonna go hide in a corner. ):
+
+        public void StopKernel(Exception ex)
+        {
+            //PlayErrorSound(); Dang. This doesn't seem to work...
+            running = false;
+            Console.BackgroundColor = ConsoleColor.Red;
+            Console.Clear();
+            Console.WriteLine(sad_monitor);
+            string ex_message = ex.Message;
+            string inner_message = "<none>";
+            if (ex.InnerException != null)
+                inner_message = ex.InnerException.Message;
+            Console.WriteLine($@"Error message: {ex_message}
+Inner exception message: {inner_message}");
+            Console.WriteLine(memphis_logo);
+            Console.WriteLine("Press any key to reboot.");
+            try
+            {
+                Console.ReadKey();
+            }
+            catch
+            {
+
+            }
+            Sys.Power.Reboot();
+        }
+
+        public void PlayErrorSound()
+        {
+            for(int i = 500; i > 450; i--)
+            {
+                Beep(i, 100);
+            }
+            Beep(440, 10);
         }
 
         public void InterpretCMD(string input)
@@ -92,28 +322,13 @@ namespace Memphis
                 Console.WriteLine("It is safe to shut down your system.");
                 running = false;
             }
+            else if(lower.StartsWith("mousetest"))
+            {
+                var m = new Mouse();
+            }
             else if(lower.StartsWith("conf-gen"))
             {
                 StartApplicationLoop(new Apps.ConfigurationGenerator(), new[] { "" });
-            }
-            else if(lower.StartsWith("rm "))
-            {
-                string path = current_directory + input.Remove(0, 3);
-                if (Directory.Exists(path))
-                {
-                    Console.WriteLine("rm: You can't delete a directory. Not yet implemented.");
-                }
-                else
-                {
-                    if(File.Exists(path))
-                    {
-                        File.Delete(path);
-                    }
-                    else
-                    {
-                        Console.WriteLine("rm: File doesn't exist.");
-                    }
-                }
             }
             else if(lower.StartsWith("win_test"))
             {
@@ -185,15 +400,7 @@ namespace Memphis
             }
             else if (lower.StartsWith("$"))
             {
-                string[] evars = split_str(env_vars, ";");
-                foreach (string kv in evars)
-                {
-                    string[] var = split_str(kv, ":");
-                    if (var[0].ToLower() == lower.Remove(0, 1))
-                    {
-                        Console.WriteLine(var[0] + " = " + var[1]);
-                    }
-                }
+                Console.WriteLine(GetVar(input.Remove(0, 1)));
             }
             else if (lower.StartsWith("test_crash"))
             {
