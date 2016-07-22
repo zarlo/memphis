@@ -16,6 +16,8 @@ First, you'll need the latest Cosmos Developer Kit. You can get it from cloning 
 
 After all of that is done, you should be able to compile and run inside VMWare, just by opening the Memphis solution and striking the F5 key.
 
+***NOTE***: As found by @CaveSponge and @jp2masa on the [Cosmos Gitter](http://gitter.im/CosmosOS/Cosmos), there is a build bug where Memphis may throw you a "MemphisBoot.bin not found" error when compiling. To fix this, in Visual Studio, right click the solution inside the Solution Explorer, go to Configuration Manager, and under the Build section make sure all checkboxes are **enabled**. Then, simply rebuild the solution (right click solution in Solution Explorer and click Rebuild Solution) and you should be good to go.
+
 ## Help! It won't boot!
 
 Sometimes, this weird thing happens where an incorrect project is set as the startup one, and when you compile, the OS won't boot, but instead Visual Studio will say "You can't run this project because it isn't executable!" or something like that.
